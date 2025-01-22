@@ -1,13 +1,13 @@
-name: Master CI/CD
+name: CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ develop, master ]
   push:
-    branches: [ master ]
+    branches: [ develop, master ]
 
 jobs:
-  build-test-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
 
     services:
@@ -34,49 +34,45 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Check code style
-        run: ./gradlew checkstyleMain checkstyleTest
+      - name: Build and Test
+        run: |
+          chmod +x gradlew
+          ./gradlew build
 
-      - name: Run tests with Gradle
-        run: ./gradlew test
+      - name: Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: |
+            build/reports/tests/
+            build/reports/jacoco/
+            build/reports/checkstyle/
+            build/reports/pmd/
 
-      - name: Build with Gradle
-        run: ./gradlew build
+  deploy:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Build Docker image
-        run: |
-          docker build -t lingualeap:${{ github.sha }} .
+        run: docker build -t lingualeap:${{ github.sha }} .
 
       - name: Login to Docker Hub
-        if: github.event_name == 'push'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Push Docker image
-        if: github.event_name == 'push'
         run: |
           docker tag lingualeap:${{ github.sha }} ${{ secrets.DOCKER_HUB_USERNAME }}/lingualeap:latest
           docker tag lingualeap:${{ github.sha }} ${{ secrets.DOCKER_HUB_USERNAME }}/lingualeap:${{ github.sha }}
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/lingualeap:latest
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/lingualeap:${{ github.sha }}
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: build/reports/tests/
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: build/reports/jacoco/

@@ -52,6 +52,7 @@ jobs:
             build/reports/jacoco/
             build/reports/checkstyle/
             build/reports/pmd/
+          retention-days: 5
 
   deploy:
     needs: build-and-test

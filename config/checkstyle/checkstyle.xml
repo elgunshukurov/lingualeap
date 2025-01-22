@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!-- commons math customization of default Checkstyle behavior -->
+<module name="Checker">
+    <property name="localeLanguage" value="en"/>
+
+    <module name="SuppressWarningsFilter"/>
+
+    <module name="TreeWalker">
+
+        <module name="SuppressWarningsHolder" />
+
+        <module name="SuppressionCommentFilter"/>
+
+        <!-- Operator must be at end of wrapped line -->
+        <module name="OperatorWrap">
+            <property name="option" value="eol"/>
+        </module>
+
+        <!-- No if/else/do/for/while without braces -->
+        <module name="NeedBraces"/>
+
+        <!-- Interfaces must be types (not just constants) -->
+        <module name="InterfaceIsType"/>
+
+        <!-- No public fields -->
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
+
+        <!-- Require hash code override when equals is -->
+        <module name="EqualsHashCode"/>
+
+        <!-- Disallow unnecessary instantiation of Boolean, String -->
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean, java.lang.String"/>
+        </module>
+
+        <!--  Import should be explicit, really needed and only from pure java packages -->
+        <module name="AvoidStarImport"/>
+        <module name="UnusedImports"/>
+        <module name="IllegalImport"/>
+
+        <!-- Switch statements should be complete and with independent cases -->
+        <module name="FallThrough"/>
+        <module name="MissingSwitchDefault"/>
+
+        <!-- Constant names should obey the traditional all uppercase naming convention -->
+        <module name="ConstantName"/>
+
+        <!-- Method parameters and local variables should not hide fields, except in constructors and setters -->
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
+
+        <!-- No trailing whitespace -->
+        <module name="Regexp">
+            <property name="format" value="[ \t]+$"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message" value="Trailing whitespace"/>
+        </module>
+
+        <!-- No System.out.println() statements -->
+        <module name="Regexp">
+            <!-- no sysouts -->
+            <property name="format" value="System\.out\.println"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+
+        <!-- Authors should be in pom.xml file -->
+        <module name="Regexp">
+            <property name="format" value="@author"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message" value="developers names should be in pom file"/>
+        </module>
+
+        <!-- Use a consistent way to put modifiers -->
+        <module name="RedundantModifier"/>
+        <module name="ModifierOrder"/>
+
+        <!-- Use a consistent way to put declarations -->
+        <module name="DeclarationOrder"/>
+
+        <!-- Don't add up parentheses when they are not required -->
+        <module name="UnnecessaryParentheses"/>
+
+        <!--  Don't use too widespread catch (Exception, Throwable, RuntimeException)  -->
+        <!--        <module name="IllegalCatch"/>-->
+
+        <!-- Don't use = or != for string comparisons -->
+        <module name="StringLiteralEquality"/>
+
+        <!-- Don't declare multiple variables in the same statement -->
+        <module name="MultipleVariableDeclarations"/>
+
+        <!-- String literals more than one character long should not be repeated several times -->
+        <!-- the "unchecked" string is also accepted to allow @SuppressWarnings("unchecked") -->
+        <module name="MultipleStringLiterals">
+            <property name="ignoreStringsRegexp" value='^(("")|(".")|("unchecked"))$'/>
+        </module>
+    </module>
+
+    <!-- No tabs allowed! -->
+    <module name="FileTabCharacter"/>
+
+    <!-- Require files to end with newline characters -->
+    <module name="NewlineAtEndOfFile"/>
+</module>

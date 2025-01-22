@@ -37,4 +37,7 @@ out/
 .vscode/
 
 ### Documentation ###
-doc/
+docs/
+
+### Database ###
+docker/

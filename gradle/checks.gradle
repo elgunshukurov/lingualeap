@@ -1,0 +1,80 @@
+// Jacoco configuration
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco')
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'PACKAGE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.70
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.70
+            }
+            excludes = [
+                    'ai.lingualeap.lingualeap',
+                    'ai.lingualeap.lingualeap.*'
+            ]
+        }
+    }
+}
+
+
+// Checkstyle configuration
+configurations {
+    checkstyle {
+        resolutionStrategy {
+            capabilitiesResolution {
+                withCapability("com.google.collections:google-collections") {
+                    select("com.google.guava:guava:0")
+                }
+            }
+        }
+    }
+}
+
+checkstyle {
+    toolVersion = '8.33'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    showViolations = true
+    ignoreFailures = false
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = false
+        html.required = true
+        html.stylesheet = resources.text.fromFile('config/checkstyle/checkstyle-custom.xsl')
+    }
+}
+
+// PMD configuration
+pmd {
+    toolVersion = "6.21.0"
+    consoleOutput = true
+    rulesMinimumPriority = 5
+    ruleSets = ["${rootDir}/config/pmd/ruleset.xml"]
+}
+
+tasks.withType(Pmd) {
+    reports {
+        xml.required = false
+        html.required = true
+    }
+}

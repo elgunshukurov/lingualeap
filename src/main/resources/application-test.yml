@@ -11,8 +11,3 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-logging:
-  level:
-    root: INFO
-    ai.lingualeap: DEBUG

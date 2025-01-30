@@ -33,6 +33,8 @@ ext {
 	testcontainersVersion = '1.19.3'
 	postgresqlVersion = '42.7.1'
 	junitPlatformVersion = '1.10.1'
+	mapstructVersion = '1.5.5.Final'
+	springdocVersion = '2.7.0'
 }
 
 dependencies {
@@ -47,6 +49,24 @@ dependencies {
 	// Lombok
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+	// MapStruct
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	// Lombok ve MapStruct
+	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+	// Logging
+	implementation 'org.slf4j:slf4j-api:2.0.16'
+
+
+	// SpringDoc OpenAPI
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+	// Validation
+	implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+
 
 	// Test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

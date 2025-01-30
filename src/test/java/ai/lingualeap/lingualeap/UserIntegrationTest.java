@@ -30,6 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class UserIntegrationTest extends BaseIntegrationTest {
 
+    private static final String INTEGRATION_TEST_USERNAME = "integrationtest";
+    private static final String INTEGRATION_TEST_EMAIL = "integration@test.com";
+    private static final String USERS_ENDPOINT = "/api/v1/users";
+    private static final String USER_ENDPOINT = "/api/v1/users/{id}";
+    private static final String STATUS_EXPRESSION = "$.status";
+    private static final String ACTIVE_STATUS = "ACTIVE";
+    private static final String USER_PASSWORD = "password123";
     @Autowired
     private MockMvc mockMvc;
 
@@ -47,14 +54,14 @@ class UserIntegrationTest extends BaseIntegrationTest {
     @Test
     void createAndRetrieveUser() throws Exception {
         UserCreateRequest request = new UserCreateRequest();
-        request.setUsername("integrationtest");
-        request.setEmail("integration@test.com");
-        request.setPassword("password123");
+        request.setUsername(INTEGRATION_TEST_USERNAME);
+        request.setEmail(INTEGRATION_TEST_EMAIL);
+        request.setPassword(USER_PASSWORD);
         request.setFirstName("Integration");
         request.setLastName("Test");
 
         // Create user
-        MvcResult createResult = mockMvc.perform(post("/api/v1/users")
+        MvcResult createResult = mockMvc.perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -66,16 +73,16 @@ class UserIntegrationTest extends BaseIntegrationTest {
         );
 
         assertNotNull(createResponse.getId());
-        assertEquals("integrationtest", createResponse.getUsername());
-        assertEquals("integration@test.com", createResponse.getEmail());
+        assertEquals(INTEGRATION_TEST_USERNAME, createResponse.getUsername());
+        assertEquals(INTEGRATION_TEST_EMAIL, createResponse.getEmail());
         assertEquals(UserStatus.ACTIVE, createResponse.getStatus());
 
         // Retrieve user
-        mockMvc.perform(get("/api/v1/users/{id}", createResponse.getId()))
+        mockMvc.perform(get(USER_ENDPOINT, createResponse.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("integrationtest"))
-                .andExpect(jsonPath("$.email").value("integration@test.com"))
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+                .andExpect(jsonPath("$.username").value(INTEGRATION_TEST_USERNAME))
+                .andExpect(jsonPath("$.email").value(INTEGRATION_TEST_EMAIL))
+                .andExpect(jsonPath(STATUS_EXPRESSION).value(ACTIVE_STATUS));
     }
 
     @Test
@@ -83,17 +90,17 @@ class UserIntegrationTest extends BaseIntegrationTest {
         UserCreateRequest request = new UserCreateRequest();
         request.setUsername("duplicate");
         request.setEmail("first@test.com");
-        request.setPassword("password123");
+        request.setPassword(USER_PASSWORD);
 
         // Create first user
-        mockMvc.perform(post("/api/v1/users")
+        mockMvc.perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         // Try to create duplicate
         request.setEmail("second@test.com");
-        mockMvc.perform(post("/api/v1/users")
+        mockMvc.perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -105,9 +112,9 @@ class UserIntegrationTest extends BaseIntegrationTest {
         UserCreateRequest request = new UserCreateRequest();
         request.setUsername("todeactivate");
         request.setEmail("deactivate@test.com");
-        request.setPassword("password123");
+        request.setPassword(USER_PASSWORD);
 
-        MvcResult createResult = mockMvc.perform(post("/api/v1/users")
+        MvcResult createResult = mockMvc.perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -123,9 +130,9 @@ class UserIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isNoContent());
 
         // Verify user is deactivated
-        mockMvc.perform(get("/api/v1/users/{id}", createResponse.getId()))
+        mockMvc.perform(get(USER_ENDPOINT, createResponse.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("INACTIVE"));
+                .andExpect(jsonPath(STATUS_EXPRESSION).value("INACTIVE"));
     }
 
     @Test
@@ -135,22 +142,22 @@ class UserIntegrationTest extends BaseIntegrationTest {
         createTestUser("user2", "user2@test.com");
 
         // Search with pagination
-        mockMvc.perform(get("/api/v1/users")
-                        .param("status", "ACTIVE")
+        mockMvc.perform(get(USERS_ENDPOINT)
+                        .param("status", ACTIVE_STATUS)
                         .param("size", "10")
                         .param("page", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.content[0].status").value("ACTIVE"));
+                .andExpect(jsonPath("$.content[0].status").value(ACTIVE_STATUS));
     }
 
     private void createTestUser(String username, String email) throws Exception {
         UserCreateRequest request = new UserCreateRequest();
         request.setUsername(username);
         request.setEmail(email);
-        request.setPassword("password123");
+        request.setPassword(USER_PASSWORD);
 
-        mockMvc.perform(post("/api/v1/users")
+        mockMvc.perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());

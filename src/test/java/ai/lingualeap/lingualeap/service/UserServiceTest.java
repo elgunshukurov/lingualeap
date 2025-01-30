@@ -22,13 +22,19 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+    private static final String USER_NAME = "testuser";
+    private static final String EMAIL_ADDRESS = "test@example.com";
     @Mock
     private UserRepository userRepository;
 
@@ -46,19 +52,19 @@ class UserServiceTest {
     void setUp() {
         testUser = new User();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
-        testUser.setEmail("test@example.com");
+        testUser.setUsername(USER_NAME);
+        testUser.setEmail(EMAIL_ADDRESS);
         testUser.setStatus(UserStatus.ACTIVE);
 
         createRequest = new UserCreateRequest();
-        createRequest.setUsername("testuser");
-        createRequest.setEmail("test@example.com");
+        createRequest.setUsername(USER_NAME);
+        createRequest.setEmail(EMAIL_ADDRESS);
         createRequest.setPassword("password123");
 
         userResponse = new UserResponse();
         userResponse.setId(1L);
-        userResponse.setUsername("testuser");
-        userResponse.setEmail("test@example.com");
+        userResponse.setUsername(USER_NAME);
+        userResponse.setEmail(EMAIL_ADDRESS);
     }
 
     @Test
@@ -72,15 +78,15 @@ class UserServiceTest {
         UserResponse result = userService.createUser(createRequest);
 
         assertNotNull(result);
-        assertEquals("testuser", result.getUsername());
-        assertEquals("test@example.com", result.getEmail());
+        assertEquals(USER_NAME, result.getUsername());
+        assertEquals(EMAIL_ADDRESS, result.getEmail());
 
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     void createUser_DuplicateUsername() {
-        when(userRepository.existsByUsername("testuser")).thenReturn(true);
+        when(userRepository.existsByUsername(USER_NAME)).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () ->
                 userService.createUser(createRequest)
@@ -98,7 +104,7 @@ class UserServiceTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals("testuser", result.getUsername());
+        assertEquals(USER_NAME, result.getUsername());
     }
 
     @Test
@@ -126,7 +132,7 @@ class UserServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals("testuser", result.getContent().get(0).getUsername());
+        assertEquals(USER_NAME, result.getContent().get(0).getUsername());
     }
 
     @Test

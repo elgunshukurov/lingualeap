@@ -9,21 +9,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserTest {
 
+    private static final String USER_NAME = "testuser";
+    private static final String EMAIL_ADDRESS = "test@example.com";
+    private static final String USER_PASSWORD = "password123";
+    private static final String USER_FIRST_NAME = "Test";
+    private static final String USER_LAST_NAME = "User";
+
     @Test
     void testUserCreation() {
         User user = new User();
-        user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        user.setPassword("password123");
-        user.setFirstName("Test");
-        user.setLastName("User");
+        user.setUsername(USER_NAME);
+        user.setEmail(EMAIL_ADDRESS);
+        user.setPassword(USER_PASSWORD);
+        user.setFirstName(USER_FIRST_NAME);
+        user.setLastName(USER_LAST_NAME);
         user.setStatus(UserStatus.ACTIVE);
 
-        assertEquals("testuser", user.getUsername());
-        assertEquals("test@example.com", user.getEmail());
-        assertEquals("password123", user.getPassword());
-        assertEquals("Test", user.getFirstName());
-        assertEquals("User", user.getLastName());
+        assertEquals(USER_NAME, user.getUsername());
+        assertEquals(EMAIL_ADDRESS, user.getEmail());
+        assertEquals(USER_PASSWORD, user.getPassword());
+        assertEquals(USER_FIRST_NAME, user.getFirstName());
+        assertEquals(USER_LAST_NAME, user.getLastName());
         assertEquals(UserStatus.ACTIVE, user.getStatus());
         assertTrue(user.isActive());
         assertFalse(user.isBanned());

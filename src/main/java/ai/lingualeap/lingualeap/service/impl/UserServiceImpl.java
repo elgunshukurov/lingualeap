@@ -1,6 +1,5 @@
 package ai.lingualeap.lingualeap.service.impl;
 
-
 import ai.lingualeap.lingualeap.dao.entity.User;
 import ai.lingualeap.lingualeap.dao.repository.UserRepository;
 import ai.lingualeap.lingualeap.model.enums.UserStatus;
@@ -24,18 +23,22 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final String USERNAME_EXISTS_ERROR_MESSAGE = "Username already exists: ";
+    private static final String EMAIL_EXISTS_ERROR_MESSAGE = "Email already exists: ";
+    private static final String CREATED_AT = "createdAt";
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private static final int MAX_PAGE_SIZE = 100;
 
     @Override
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username already exists: " + request.getUsername());
+            throw new IllegalArgumentException(USERNAME_EXISTS_ERROR_MESSAGE + request.getUsername());
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+            throw new IllegalArgumentException(EMAIL_EXISTS_ERROR_MESSAGE + request.getEmail());
         }
 
         User user = userMapper.toEntity(request);
@@ -48,14 +51,14 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(Long id, UserUpdateRequest request) {
         User user = getUserEntityById(id);
 
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())
-                && userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username already exists: " + request.getUsername());
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername()) &&
+                userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException(USERNAME_EXISTS_ERROR_MESSAGE + request.getUsername());
         }
 
-        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())
-                && userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail()) &&
+                userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException(EMAIL_EXISTS_ERROR_MESSAGE + request.getEmail());
         }
 
         userMapper.updateEntityFromRequest(request, user);
@@ -79,12 +82,10 @@ public class UserServiceImpl implements UserService {
                                           LocalDateTime createdAtStart,
                                           LocalDateTime createdAtEnd,
                                           Pageable pageable) {
-        // Sayfa boyutu kontrolü
         if (pageable.getPageSize() > MAX_PAGE_SIZE) {
             throw new IllegalArgumentException("Page size cannot be greater than " + MAX_PAGE_SIZE);
         }
 
-        // Specification oluştur
         Specification<User> spec = Specification.where(null);
 
         if (status != null) {
@@ -92,11 +93,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (createdAtStart != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), createdAtStart));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get(CREATED_AT), createdAtStart));
         }
 
         if (createdAtEnd != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), createdAtEnd));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get(CREATED_AT), createdAtEnd));
         }
 
         return userRepository.findAll(spec, pageable).map(userMapper::toResponse);

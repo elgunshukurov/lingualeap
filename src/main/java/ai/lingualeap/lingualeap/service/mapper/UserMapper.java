@@ -12,11 +12,16 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+import java.util.HashSet;
+import java.util.Set;
+
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        imports = {HashSet.class, Set.class})
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "roles", expression = "java(new HashSet<>(Set.of(UserRole.USER)))")
     @Mapping(target = "status", constant = "ACTIVE")
     @Mapping(target = "lastLoginAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

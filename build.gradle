@@ -22,7 +22,7 @@ configurations {
 	}
 }
 
-apply from: 'gradle/checks.gradle';
+apply from: 'gradle/checks.gradle'
 
 repositories {
 	mavenCentral()
@@ -60,6 +60,11 @@ dependencies {
 	// Logging
 	implementation 'org.slf4j:slf4j-api:2.0.16'
 
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	// SpringDoc OpenAPI
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"

@@ -1,6 +1,7 @@
 package ai.lingualeap.lingualeap.dao.entity;
 
 import ai.lingualeap.lingualeap.dao.entity.base.BaseEntity;
+import ai.lingualeap.lingualeap.model.enums.UserRole;
 import ai.lingualeap.lingualeap.model.enums.UserStatus;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -17,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -49,8 +51,9 @@ public class User extends BaseEntity {
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id")
     )
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Set<String> roles;
+    private Set<UserRole> roles = new HashSet<>();
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;

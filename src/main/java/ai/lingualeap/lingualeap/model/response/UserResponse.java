@@ -1,5 +1,6 @@
 package ai.lingualeap.lingualeap.model.response;
 
+import ai.lingualeap.lingualeap.model.enums.UserRole;
 import ai.lingualeap.lingualeap.model.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public class UserResponse {
     private String firstName;
     private String lastName;
     private UserStatus status;
-    private Set<String> roles;
+    private Set<UserRole> roles;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginAt;

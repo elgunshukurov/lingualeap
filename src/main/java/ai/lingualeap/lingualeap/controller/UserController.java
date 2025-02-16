@@ -39,7 +39,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "Create a new user",
+    @Operation(summary = "Create a new user by Admin (protected)",
             description = "Creates a new user with the provided details")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully"),

@@ -37,6 +37,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LessonServiceImpl implements LessonService {
 
+    public static final String ERROR_SEQUENCE_EXISTS = "Sequence already exists in this module";
+    public static final String PREREQUISITE_NOT_FOUND_MESSAGE = "Prerequisite lesson not found with id: ";
+    public static final String LESSON_NOT_FOUND_MESSAGE = "Lesson not found with id: ";
     private final LessonRepository lessonRepository;
     private final ModuleRepository moduleRepository;
     private final UserProgressRepository userProgressRepository;
@@ -52,7 +55,7 @@ public class LessonServiceImpl implements LessonService {
 
         if (request.sequence() != null &&
                 lessonRepository.existsByModuleIdAndSequence(module.getId(), request.sequence())) {
-            throw new IllegalArgumentException("Sequence already exists in this module");
+            throw new IllegalArgumentException(ERROR_SEQUENCE_EXISTS);
         }
 
         Lesson lesson = lessonMapper.toEntity(request);
@@ -61,7 +64,7 @@ public class LessonServiceImpl implements LessonService {
         if (request.prerequisiteIds() != null && !request.prerequisiteIds().isEmpty()) {
             Set<Lesson> prerequisites = request.prerequisiteIds().stream()
                     .map(id -> lessonRepository.findById(id)
-                            .orElseThrow(() -> new EntityNotFoundException("Prerequisite lesson not found with id: " + id)))
+                            .orElseThrow(() -> new EntityNotFoundException(PREREQUISITE_NOT_FOUND_MESSAGE + id)))
                     .collect(Collectors.toSet());
             lesson.setPrerequisites(prerequisites);
         }
@@ -78,12 +81,12 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Updating lesson with id: {}", id);
 
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + id));
 
         if (request.sequence() != null &&
                 !request.sequence().equals(lesson.getSequence()) &&
                 lessonRepository.existsByModuleIdAndSequence(lesson.getModule().getId(), request.sequence())) {
-            throw new IllegalArgumentException("Sequence already exists in this module");
+            throw new IllegalArgumentException(ERROR_SEQUENCE_EXISTS);
         }
 
         lessonMapper.updateEntityFromRequest(request, lesson);
@@ -91,7 +94,7 @@ public class LessonServiceImpl implements LessonService {
         if (request.prerequisiteIds() != null) {
             Set<Lesson> prerequisites = request.prerequisiteIds().stream()
                     .map(prereqId -> lessonRepository.findById(prereqId)
-                            .orElseThrow(() -> new EntityNotFoundException("Prerequisite lesson not found with id: " + prereqId)))
+                            .orElseThrow(() -> new EntityNotFoundException(PREREQUISITE_NOT_FOUND_MESSAGE + prereqId)))
                     .collect(Collectors.toSet());
             lesson.setPrerequisites(prerequisites);
         }
@@ -107,7 +110,7 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Getting lesson by id: {}", id);
         return lessonRepository.findById(id)
                 .map(lessonMapper::toResponse)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + id));
     }
 
     @Override
@@ -145,7 +148,7 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Deleting lesson with id: {}", id);
 
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + id));
 
         List<Lesson> dependentLessons = lessonRepository.findByPrerequisitesContaining(lesson);
         if (!dependentLessons.isEmpty()) {
@@ -162,7 +165,7 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Updating lesson status. Id: {}, new status: {}", id, status);
 
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + id));
 
         lesson.setStatus(status);
         lesson = lessonRepository.save(lesson);
@@ -210,10 +213,10 @@ public class LessonServiceImpl implements LessonService {
         }
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + lessonId));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + lessonId));
 
         Lesson prerequisite = lessonRepository.findById(prerequisiteId)
-                .orElseThrow(() -> new EntityNotFoundException("Prerequisite lesson not found with id: " + prerequisiteId));
+                .orElseThrow(() -> new EntityNotFoundException(PREREQUISITE_NOT_FOUND_MESSAGE + prerequisiteId));
 
         if (isCircularDependency(prerequisite, lesson)) {
             throw new IllegalArgumentException("Adding this prerequisite would create a circular dependency");
@@ -231,7 +234,7 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Removing prerequisite {} from lesson {}", prerequisiteId, lessonId);
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + lessonId));
+                .orElseThrow(() -> new EntityNotFoundException(LESSON_NOT_FOUND_MESSAGE + lessonId));
 
         lesson.getPrerequisites().removeIf(p -> p.getId().equals(prerequisiteId));
         lessonRepository.save(lesson);

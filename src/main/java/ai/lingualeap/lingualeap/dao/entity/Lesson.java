@@ -22,6 +22,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -79,6 +80,7 @@ public class Lesson extends BaseEntity {
             joinColumns = @JoinColumn(name = "lesson_id"),
             inverseJoinColumns = @JoinColumn(name = "prerequisite_id")
     )
+
     private Set<Lesson> prerequisites;
 
     @ElementCollection
@@ -86,5 +88,14 @@ public class Lesson extends BaseEntity {
             name = "lesson_objectives",
             joinColumns = @JoinColumn(name = "lesson_id")
     )
+
     private Set<LearningObjective> learningObjectives;
+
+    @ManyToMany
+    @JoinTable(
+            name = "lesson_tags",
+            joinColumns = @JoinColumn(name = "lesson_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
 }

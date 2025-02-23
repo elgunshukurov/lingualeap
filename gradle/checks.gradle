@@ -50,7 +50,7 @@ configurations {
 }
 
 checkstyle {
-    toolVersion = '8.33'
+    toolVersion = '10.12.4'
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
     showViolations = true
     ignoreFailures = false

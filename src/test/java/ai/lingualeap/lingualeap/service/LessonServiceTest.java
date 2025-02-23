@@ -29,12 +29,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LessonServiceTest {
+    private static final String TEST_LESSON_TITLE = "Test Lesson";
+    private static final String TEST_DESCRIPTION = "Description";
+    private static final String THEORY_CONTENT = "Theory content";
 
     @Mock
     private LessonRepository lessonRepository;
@@ -65,22 +72,22 @@ class LessonServiceTest {
 
         testLesson = new Lesson();
         testLesson.setId(1L);
-        testLesson.setTitle("Test Lesson");
+        testLesson.setTitle(TEST_LESSON_TITLE);
         testLesson.setType(LessonType.THEORY);
         testLesson.setLevel(LessonLevel.BEGINNER);
         testLesson.setStatus(LessonStatus.DRAFT);
         testLesson.setModule(testModule);
 
         createRequest = new LessonCreateRequest(
-                "Test Lesson",
-                "Description",
+                TEST_LESSON_TITLE,
+                TEST_DESCRIPTION,
                 LessonType.THEORY,
                 LessonLevel.BEGINNER,
                 1L,
                 1,
                 70,
                 30,
-                "Theory content",
+                THEORY_CONTENT,
                 false,
                 null,
                 Set.of(),
@@ -105,15 +112,15 @@ class LessonServiceTest {
 
         lessonResponse = new LessonResponse(
                 1L,
-                "Test Lesson",
-                "Description",
+                TEST_LESSON_TITLE,
+                TEST_DESCRIPTION,
                 LessonType.THEORY,
                 LessonLevel.BEGINNER,
                 LessonStatus.DRAFT,
                 1,
                 70,
                 30,
-                "Theory content",
+                THEORY_CONTENT,
                 false,
                 null,
                 null,
@@ -135,7 +142,7 @@ class LessonServiceTest {
         LessonResponse result = lessonService.createLesson(createRequest);
 
         assertNotNull(result);
-        assertEquals("Test Lesson", result.title());
+        assertEquals(TEST_LESSON_TITLE, result.title());
         assertEquals(LessonType.THEORY, result.type());
 
         verify(moduleRepository).findById(1L);

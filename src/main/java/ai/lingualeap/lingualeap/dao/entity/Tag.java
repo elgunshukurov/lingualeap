@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,5 +23,5 @@ public class Tag extends BaseEntity {
     private String description;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Lesson> lessons;
+    private Set<Lesson> lessons = new HashSet<>();
 }

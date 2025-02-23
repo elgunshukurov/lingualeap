@@ -97,4 +97,10 @@ check {
 tasks.named('test') {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
+	maxParallelForks = (Runtime.runtime.availableProcessors() / 2) as int ?: 1
+
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = false
+	}
 }

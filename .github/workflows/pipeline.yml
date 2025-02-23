@@ -40,7 +40,7 @@ jobs:
       - name: Build and Test
         run: |
           chmod +x gradlew
-          ./gradlew build -x test -x integrationTest
+          ./gradlew build -x test 
 
       - name: Upload Reports
         if: always()

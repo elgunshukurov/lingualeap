@@ -69,6 +69,24 @@ The application will be available at `http://localhost:8080/api/v1`
 ### Code Style
 We follow standard Java code style with some custom rules. See `rules.txt` for details.
 
+## Environment Variables
+
+This project requires the following environment variables:
+
+| Variable Name | Description | Default Value (Dev/Test only) |
+|--------------|----------|------------------|
+| JWT_SECRET_KEY | JWT token signing key | Exists in dev/test config |
+| DB_USERNAME | Database username | postgres |
+| DB_PASSWORD | Database password | postgres |
+| DB_URL | Database URL | jdbc:postgresql://localhost:5432/lingualeap |
+
+### GitHub Secrets Setup
+
+To run this project:
+
+1. Go to "Settings" > "Secrets and variables" > "Actions" in your GitHub repository
+2. Add the environment variables listed above
+
 ## Contributing
 
 1. Create a feature branch

@@ -45,6 +45,14 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
     private static final String TEST_DESCRIPTION = "Test Description";
     private static final String TEST_LESSON_TITLE = "Test Lesson";
 
+    // Sabit string değerleri için yeni constantlar ekliyoruz
+    private static final String PATH_ID = "/{id}";
+    private static final String PATH_STATUS = "/{id}/status";
+    private static final String PARAM_STATUS = "status";
+    private static final String STATUS_PUBLISHED = "PUBLISHED";
+    private static final String PATH_MODULE_REORDER = "/module/{moduleId}/reorder";
+    private static final String PATH_PREREQUISITES = "/{id}/prerequisites/{prerequisiteId}";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -144,13 +152,13 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden());
 
         // Update lesson - should be forbidden
-        mockMvc.perform(put(API_LESSONS + "/{id}", testLesson.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_ID, testLesson.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isForbidden());
 
         // Get lesson by id - should be forbidden
-        mockMvc.perform(get(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(get(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isForbidden());
 
         // Search lessons - should be forbidden
@@ -158,12 +166,12 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden());
 
         // Delete lesson - should be forbidden
-        mockMvc.perform(delete(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(delete(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isForbidden());
 
         // Update status - should be forbidden
-        mockMvc.perform(patch(API_LESSONS + "/{id}/status", testLesson.getId())
-                        .param("status", "PUBLISHED"))
+        mockMvc.perform(patch(API_LESSONS + PATH_STATUS, testLesson.getId())
+                        .param(PARAM_STATUS, STATUS_PUBLISHED))
                 .andExpect(status().isForbidden());
     }
 
@@ -172,7 +180,7 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
     @WithMockUser(roles = "USER")
     void user_shouldHavePermission_forReadOnlyEndpoints() throws Exception {
         // Get lesson by id - should be allowed
-        mockMvc.perform(get(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(get(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isOk());
 
         // Search lessons - should be allowed
@@ -186,18 +194,18 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden());
 
         // Update lesson - should be forbidden
-        mockMvc.perform(put(API_LESSONS + "/{id}", testLesson.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_ID, testLesson.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isForbidden());
 
         // Delete lesson - should be forbidden
-        mockMvc.perform(delete(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(delete(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isForbidden());
 
         // Update status - should be forbidden
-        mockMvc.perform(patch(API_LESSONS + "/{id}/status", testLesson.getId())
-                        .param("status", "PUBLISHED"))
+        mockMvc.perform(patch(API_LESSONS + PATH_STATUS, testLesson.getId())
+                        .param(PARAM_STATUS, STATUS_PUBLISHED))
                 .andExpect(status().isForbidden());
     }
 
@@ -212,13 +220,13 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isCreated());
 
         // Update lesson - should be allowed
-        mockMvc.perform(put(API_LESSONS + "/{id}", testLesson.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_ID, testLesson.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk());
 
         // Get lesson by id - should be allowed
-        mockMvc.perform(get(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(get(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isOk());
 
         // Search lessons - should be allowed
@@ -226,25 +234,25 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isOk());
 
         // Update status - should be allowed
-        mockMvc.perform(patch(API_LESSONS + "/{id}/status", testLesson.getId())
-                        .param("status", "PUBLISHED"))
+        mockMvc.perform(patch(API_LESSONS + PATH_STATUS, testLesson.getId())
+                        .param(PARAM_STATUS, STATUS_PUBLISHED))
                 .andExpect(status().isOk());
 
         // Add prerequisite - should be allowed
-        mockMvc.perform(post(API_LESSONS + "/{id}/prerequisites/{prerequisiteId}",
+        mockMvc.perform(post(API_LESSONS + PATH_PREREQUISITES,
                         testLesson.getId(), testLesson.getId()))
                 .andExpect(status().isBadRequest()); // Bad request because same lesson can't be its own prerequisite
 
         // Reorder lessons - should be allowed
         Map<Long, Integer> reorderMap = new HashMap<>();
         reorderMap.put(testLesson.getId(), 3);
-        mockMvc.perform(put(API_LESSONS + "/module/{moduleId}/reorder", testModule.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_MODULE_REORDER, testModule.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reorderMap)))
                 .andExpect(status().isNoContent());
 
         // Delete lesson - should be forbidden (admin only)
-        mockMvc.perform(delete(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(delete(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isForbidden());
     }
 
@@ -259,13 +267,13 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isCreated());
 
         // Update lesson - should be allowed
-        mockMvc.perform(put(API_LESSONS + "/{id}", testLesson.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_ID, testLesson.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk());
 
         // Get lesson by id - should be allowed
-        mockMvc.perform(get(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(get(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isOk());
 
         // Search lessons - should be allowed
@@ -273,20 +281,20 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isOk());
 
         // Update status - should be allowed
-        mockMvc.perform(patch(API_LESSONS + "/{id}/status", testLesson.getId())
-                        .param("status", "PUBLISHED"))
+        mockMvc.perform(patch(API_LESSONS + PATH_STATUS, testLesson.getId())
+                        .param(PARAM_STATUS, STATUS_PUBLISHED))
                 .andExpect(status().isOk());
 
         // Reorder lessons - should be allowed
         Map<Long, Integer> reorderMap = new HashMap<>();
         reorderMap.put(testLesson.getId(), 3);
-        mockMvc.perform(put(API_LESSONS + "/module/{moduleId}/reorder", testModule.getId())
+        mockMvc.perform(put(API_LESSONS + PATH_MODULE_REORDER, testModule.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reorderMap)))
                 .andExpect(status().isNoContent());
 
         // Delete lesson - should be allowed (admin only)
-        mockMvc.perform(delete(API_LESSONS + "/{id}", testLesson.getId()))
+        mockMvc.perform(delete(API_LESSONS + PATH_ID, testLesson.getId()))
                 .andExpect(status().isNoContent());
     }
 }

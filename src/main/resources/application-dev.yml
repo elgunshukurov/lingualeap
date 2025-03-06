@@ -11,3 +11,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  security:
+    debugging:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.authentication: TRACE
+    ai.lingualeap.lingualeap: DEBUG

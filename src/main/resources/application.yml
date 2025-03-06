@@ -10,5 +10,5 @@ server:
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECRET_KEY:defaulSecretKeyForDevOnly}
+      secret-key: ${JWT_SECRET_KEY:q5t7w9y2x4z6A8C0E2G4I6K8M0O2Q4S6U8W0Y2a4c6e8g0i2k4m6o8}
       expiration: 86400000 # 1 day

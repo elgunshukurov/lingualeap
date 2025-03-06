@@ -1,6 +1,7 @@
 package ai.lingualeap.lingualeap.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityBeans {
 
     @Bean
-    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
+    public AuthenticationProvider authenticationProvider(
+            @Qualifier("customUserDetailsService") UserDetailsService userDetailsService) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());

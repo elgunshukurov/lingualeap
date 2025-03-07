@@ -21,7 +21,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +46,11 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
     private static final String FIELD_ID = "id";
     private static final String USER_NOT_FOUND = "User not found with id: ";
     private static final String COURSE_NOT_FOUND = "Course not found with id: ";
+    private static final String GRAMMAR = "grammar";
+    private static final String VOCABULARY = "vocabulary";
+    private static final String LISTENING = "listening";
+    private static final String READING = "reading";
+    private static final String BEGINNER = "BEGINNER";
 
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
@@ -155,10 +159,10 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
 
         // In a real implementation, we would categorize exercises by skill based on tags or other criteria
         // For this simplified implementation, we'll create sample skill categories
-        progressBySkill.put("grammar", new ArrayList<>());
-        progressBySkill.put("vocabulary", new ArrayList<>());
-        progressBySkill.put("listening", new ArrayList<>());
-        progressBySkill.put("reading", new ArrayList<>());
+        progressBySkill.put(GRAMMAR, new ArrayList<>());
+        progressBySkill.put(VOCABULARY, new ArrayList<>());
+        progressBySkill.put(LISTENING, new ArrayList<>());
+        progressBySkill.put(READING, new ArrayList<>());
 
         // Distribute exercises to skill categories based on exercise type
         for (ExerciseProgress progress : userProgress) {
@@ -167,17 +171,17 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
             switch (progress.getExercise().getType()) {
                 case MULTIPLE_CHOICE:
                 case FILL_IN_BLANK:
-                    skillCategory = "grammar";
+                    skillCategory = GRAMMAR;
                     break;
                 case MATCHING:
-                    skillCategory = "vocabulary";
+                    skillCategory = VOCABULARY;
                     break;
                 case LISTENING:
-                    skillCategory = "listening";
+                    skillCategory = LISTENING;
                     break;
                 case TRANSLATION:
                 case WRITING:
-                    skillCategory = "reading";
+                    skillCategory = READING;
                     break;
                 default:
                     continue;
@@ -470,13 +474,15 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
         }
 
         // Get start date (or created at if no start date)
-        LocalDate startDate = progress.getStartedAt() != null
-                ? progress.getStartedAt().toLocalDate()
-                : progress.getCreatedAt().toLocalDate();
+        LocalDate startDate = progress.getStartedAt() != null ?
+                progress.getStartedAt().toLocalDate() :
+                progress.getCreatedAt().toLocalDate();
 
         // Calculate days since started
         long daysSinceStart = ChronoUnit.DAYS.between(startDate, LocalDate.now());
-        if (daysSinceStart < 1) daysSinceStart = 1; // Avoid division by zero
+        if (daysSinceStart < 1) {
+            daysSinceStart = 1;
+        } // Avoid division by zero
 
         // Calculate progress per day
         double progressPerDay = progress.getCompletionPercentage() / daysSinceStart;
@@ -672,11 +678,15 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
 
         // Calculate days since start
         long daysSinceStart = ChronoUnit.DAYS.between(startDate, LocalDate.now());
-        if (daysSinceStart < 1) daysSinceStart = 1; // Avoid division by zero
+        if (daysSinceStart < 1) {
+            daysSinceStart = 1;
+        } // Avoid division by zero
 
         // Calculate progress per day
         double progressPerDay = progress.getCompletionPercentage() / daysSinceStart;
-        if (progressPerDay < 0.1) progressPerDay = 0.1; // Minimum progress rate
+        if (progressPerDay < 0.1) {
+            progressPerDay = 0.1;
+        } // Minimum progress rate
 
         // Calculate remaining days
         double remainingProgress = 100.0 - progress.getCompletionPercentage();
@@ -690,10 +700,10 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
         // This would typically calculate proficiency for different language skills
         // For now, returning a simplified implementation with sample data
         Map<String, Double> proficiencyMap = new HashMap<>();
-        proficiencyMap.put("grammar", 75.0);
-        proficiencyMap.put("vocabulary", 82.0);
-        proficiencyMap.put("listening", 68.0);
-        proficiencyMap.put("reading", 79.0);
+        proficiencyMap.put(GRAMMAR, 75.0);
+        proficiencyMap.put(VOCABULARY, 82.0);
+        proficiencyMap.put(LISTENING, 68.0);
+        proficiencyMap.put(READING, 79.0);
         proficiencyMap.put("writing", 72.0);
         proficiencyMap.put("speaking", 65.0);
 
@@ -713,7 +723,9 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
 
         // Count exercises and time spent by day of week
         for (ExerciseProgress progress : exerciseProgresses) {
-            if (progress.getLastAttemptAt() == null) continue;
+            if (progress.getLastAttemptAt() == null) {
+                continue;
+            }
 
             String dayOfWeek = progress.getLastAttemptAt().getDayOfWeek().name();
 
@@ -755,7 +767,7 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
                 .collect(Collectors.toList());
 
         if (validProgress.isEmpty()) {
-            return new LearningPaceMetrics(0, 0, 0, 0, "BEGINNER", false, false);
+            return new LearningPaceMetrics(0, 0, 0, 0, BEGINNER, false, false);
         }
 
         // Find earliest and latest activity
@@ -771,7 +783,9 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
 
         // Calculate total days between first and last activity
         long totalDays = ChronoUnit.DAYS.between(earliestActivity, latestActivity) + 1;
-        if (totalDays < 1) totalDays = 1; // Avoid division by zero
+        if (totalDays < 1) {
+            totalDays = 1;
+        } // Avoid division by zero
 
         // Calculate exercises per time period
         double exercisesPerDay = (double) validProgress.size() / totalDays;
@@ -832,7 +846,9 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
 
     private double calculateStrengthScore(int exercisesCompleted, double averageScore) {
         // Simple formula that considers both quantity and quality
-        if (exercisesCompleted == 0) return 0;
+        if (exercisesCompleted == 0) {
+            return 0;
+        }
 
         // Base score is the average score (0-100)
         double baseScore = averageScore;
@@ -845,11 +861,19 @@ public class ProgressAnalyticsServiceImpl implements ProgressAnalyticsService {
     }
 
     private String determineStrengthLevel(double strengthScore) {
-        if (strengthScore >= 90) return "EXPERT";
-        if (strengthScore >= 75) return "ADVANCED";
-        if (strengthScore >= 60) return "INTERMEDIATE";
-        if (strengthScore >= 40) return "BASIC";
-        return "BEGINNER";
+        if (strengthScore >= 90) {
+            return "EXPERT";
+        }
+        if (strengthScore >= 75) {
+            return "ADVANCED";
+        }
+        if (strengthScore >= 60) {
+            return "INTERMEDIATE";
+        }
+        if (strengthScore >= 40) {
+            return "BASIC";
+        }
+        return BEGINNER;
     }
 
     private String toTitleCase(String text) {

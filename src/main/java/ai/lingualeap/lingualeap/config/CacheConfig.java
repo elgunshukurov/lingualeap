@@ -19,12 +19,12 @@ public class CacheConfig {
     public CacheManager localCacheManager() {
         //TODO In production, consider using Redis or other distributed cache.
         return new ConcurrentMapCacheManager(
-                "userProgress",
-                "lessonProgress",
-                "exerciseProgress",
-                "courseProgress",
-                "userActivitySummary",
-                "availableLessons"
+                CacheNames.USER_PROGRESS,
+                CacheNames.LESSON_PROGRESS,
+                CacheNames.EXERCISE_PROGRESS,
+                CacheNames.COURSE_PROGRESS,
+                CacheNames.USER_ACTIVITY,
+                CacheNames.AVAILABLE_LESSONS
         );
     }
 

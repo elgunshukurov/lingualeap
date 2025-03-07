@@ -41,23 +41,23 @@ public interface UserCourseProgressRepository extends JpaRepository<UserCoursePr
     Long countCoursesStartedInDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
     @Query(value = """
-    SELECT 
-        COUNT(DISTINCT l.id) as completedLessons, 
-        COUNT(DISTINCT e.id) as completedExercises, 
-        COUNT(DISTINCT m.id) as completedModules, 
-        AVG(ep.score) as averageScore 
-    FROM 
-        ExerciseProgress ep 
-    JOIN 
-        ep.exercise e 
-    JOIN 
-        e.lesson l 
-    JOIN 
-        l.module m 
-    WHERE 
-        ep.user.id = :userId 
-        AND m.course.id = :courseId 
+    SELECT\s
+        COUNT(DISTINCT l.id) as completedLessons,\s
+        COUNT(DISTINCT e.id) as completedExercises,\s
+        COUNT(DISTINCT m.id) as completedModules,\s
+        AVG(ep.score) as averageScore\s
+    FROM\s
+        ExerciseProgress ep\s
+    JOIN\s
+        ep.exercise e\s
+    JOIN\s
+        e.lesson l\s
+    JOIN\s
+        l.module m\s
+    WHERE\s
+        ep.user.id = :userId\s
+        AND m.course.id = :courseId\s
         AND ep.status = 'COMPLETED'
-    """)
+   \s""")
     Map<String, Object> getCourseLessonStatistics(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

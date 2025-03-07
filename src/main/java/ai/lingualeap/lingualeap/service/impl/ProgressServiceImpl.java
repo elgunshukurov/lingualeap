@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -339,99 +340,25 @@ public class ProgressServiceImpl implements ProgressService {
         final Long courseId = progress.getCourse().getId();
         final Long userId = progress.getUser().getId();
 
-        // calculate completion modules
-        List<Lesson> allLessons = lessonRepository.findAll(
-                (root, query, cb) -> cb.equal(root.get(FIELD_MODULE).get(FIELD_COURSE).get(FIELD_ID), courseId)
-        );
+        Map<String, Object> statistics = userCourseProgressRepository.getCourseLessonStatistics(userId, courseId);
 
-        int completedLessons = 0;
-        int completedExercises = 0;
-        double totalScore = 0;
-        int scoreCount = 0;
+        progress.setCompletedLessons((Integer) statistics.get("completedLessons"));
+        progress.setCompletedExercises((Integer) statistics.get("completedExercises"));
+        progress.setCompletedModules((Integer) statistics.get("completedModules"));
+        progress.setAverageScore((Double) statistics.get("averageScore"));
 
-        for (Lesson lesson : allLessons) {
-            // check lesson completion
-            List<ExerciseProgress> lessonExerciseProgress = exerciseProgressRepository.findByLessonIdAndUserId(lesson.getId(), userId);
-
-            if (!lessonExerciseProgress.isEmpty()) {
-                boolean allExercisesCompleted = lessonExerciseProgress.stream()
-                        .allMatch(ep -> CompletionStatus.COMPLETED.equals(ep.getStatus()));
-
-                if (allExercisesCompleted) {
-                    completedLessons++;
-                }
-
-                long completedExercisesInLesson = lessonExerciseProgress.stream()
-                        .filter(ep -> CompletionStatus.COMPLETED.equals(ep.getStatus()))
-                        .count();
-
-                completedExercises += completedExercisesInLesson;
-
-                final double[] tempTotalScore = {totalScore};
-                final int[] tempScoreCount = {scoreCount};
-
-                // collect data for average score
-                lessonExerciseProgress.stream()
-                        .filter(ep -> ep.getScore() != null)
-                        .forEach(ep -> {
-                            tempTotalScore[0] += ep.getScore();
-                            tempScoreCount[0]++;
-                        });
-
-                totalScore = tempTotalScore[0];
-                scoreCount = tempScoreCount[0];
-            }
-        }
-
-        double averageScore = scoreCount > 0 ? totalScore / scoreCount : 0;
-
-        int completedModules = 0;
-        var modules = moduleRepository.findByCourseIdOrderBySequenceAsc(courseId);
-
-        for (var module : modules) {
-            var moduleLessons = lessonRepository.findByModuleIdOrderBySequenceAsc(module.getId());
-
-            if (!moduleLessons.isEmpty()) {
-                boolean allLessonsCompleted = true;
-
-                for (Lesson lesson : moduleLessons) {
-                    List<ExerciseProgress> lessonExerciseProgress = exerciseProgressRepository.findByLessonIdAndUserId(lesson.getId(), userId);
-
-                    if (lessonExerciseProgress.isEmpty()) {
-                        allLessonsCompleted = false;
-                        break;
-                    }
-
-                    boolean lessonCompleted = lessonExerciseProgress.stream()
-                            .allMatch(ep -> CompletionStatus.COMPLETED.equals(ep.getStatus()));
-
-                    if (!lessonCompleted) {
-                        allLessonsCompleted = false;
-                        break;
-                    }
-                }
-
-                if (allLessonsCompleted) {
-                    completedModules++;
-                }
-            }
-        }
-
-        // update statistics
-        progress.setCompletedLessons(completedLessons);
-        progress.setCompletedExercises(completedExercises);
-        progress.setCompletedModules(completedModules);
-        progress.setAverageScore(averageScore);
-
-        // show completion percentage
         if (progress.getTotalLessons() > 0) {
-            double completionPercentage = (double) completedLessons / progress.getTotalLessons() * 100;
+            double completionPercentage = (double) progress.getCompletedLessons() / progress.getTotalLessons() * 100;
             progress.setCompletionPercentage(completionPercentage);
         }
 
-        if (completedLessons == 0) {
+        updateProgressStatus(progress);
+    }
+
+    private void updateProgressStatus(UserCourseProgress progress) {
+        if (progress.getCompletedLessons() == 0) {
             progress.setStatus(CompletionStatus.NOT_STARTED);
-        } else if (completedLessons == progress.getTotalLessons()) {
+        } else if (progress.getCompletedLessons() == progress.getTotalLessons()) {
             progress.setStatus(CompletionStatus.COMPLETED);
             progress.setCompletedAt(LocalDateTime.now());
         } else {

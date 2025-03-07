@@ -5,10 +5,12 @@ import ai.lingualeap.lingualeap.model.enums.CompletionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -37,4 +39,25 @@ public interface UserCourseProgressRepository extends JpaRepository<UserCoursePr
 
     @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.startedAt BETWEEN :startDate AND :endDate")
     Long countCoursesStartedInDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query(value = """
+    SELECT 
+        COUNT(DISTINCT l.id) as completedLessons, 
+        COUNT(DISTINCT e.id) as completedExercises, 
+        COUNT(DISTINCT m.id) as completedModules, 
+        AVG(ep.score) as averageScore 
+    FROM 
+        ExerciseProgress ep 
+    JOIN 
+        ep.exercise e 
+    JOIN 
+        e.lesson l 
+    JOIN 
+        l.module m 
+    WHERE 
+        ep.user.id = :userId 
+        AND m.course.id = :courseId 
+        AND ep.status = 'COMPLETED'
+    """)
+    Map<String, Object> getCourseLessonStatistics(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

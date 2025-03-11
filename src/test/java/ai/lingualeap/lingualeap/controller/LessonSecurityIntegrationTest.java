@@ -45,7 +45,6 @@ class LessonSecurityIntegrationTest extends BaseIntegrationTest {
     private static final String TEST_DESCRIPTION = "Test Description";
     private static final String TEST_LESSON_TITLE = "Test Lesson";
 
-    // Sabit string değerleri için yeni constantlar ekliyoruz
     private static final String PATH_ID = "/{id}";
     private static final String PATH_STATUS = "/{id}/status";
     private static final String PARAM_STATUS = "status";

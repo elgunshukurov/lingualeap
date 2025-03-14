@@ -1,61 +1,32 @@
 package ai.lingualeap.lingualeap.model.request;
 
+import ai.lingualeap.lingualeap.model.enums.ExerciseStatus;
 import ai.lingualeap.lingualeap.model.enums.ExerciseType;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.Set;
 
-public record ExerciseCreateRequest(
-        @NotBlank(message = "Title is required")
+public record ExerciseUpdateRequest(
         String title,
-
         String description,
-
-        @NotBlank(message = "Content is required")
         String content,
-
         String correctAnswer,
-
         String answerExplanation,
-
-        @NotNull(message = "Points are required")
-        @Min(value = 1, message = "Points must be at least 1")
         Integer points,
-
         Integer timeLimit,
-
-        @NotNull(message = "Exercise type is required")
         ExerciseType type,
-
+        ExerciseStatus status,
         Integer sequence,
-
         Integer difficultyLevel,
-
         Boolean requiresAudio,
-
         Boolean requiresSpeaking,
-
         Boolean autoGradable,
-
         Integer maxAttempts,
-
         Boolean hintAvailable,
-
         String hintText,
-
         Boolean isTemplate,
-
-        @NotNull(message = "Lesson ID is required")
-        Long lessonId,
-
         Set<Long> tagIds,
-
         @Valid
-        @Size(min = 0, message = "Options list cannot be null")
         List<ExerciseOptionRequest> options
 ) {}

@@ -37,8 +37,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -380,10 +381,15 @@ class ProgressServiceTest {
     @Test
     void calculateAndUpdateUserCourseProgress_Success() {
         // Mock behavior
+        Map<String, Object> mockStatistics = new HashMap<>();
+        mockStatistics.put("completedLessons", 1);
+        mockStatistics.put("completedExercises", 2);
+        mockStatistics.put("completedModules", 0);
+        mockStatistics.put("averageScore", 85.0);
+        when(userCourseProgressRepository.getCourseLessonStatistics(1L, 1L)).thenReturn(mockStatistics);
+
         when(userCourseProgressRepository.findByUserIdAndCourseId(1L, 1L))
                 .thenReturn(Optional.of(testUserCourseProgress));
-        when(lessonRepository.findAll(any(Specification.class))).thenReturn(new ArrayList<>());
-        when(moduleRepository.findByCourseIdOrderBySequenceAsc(1L)).thenReturn(new ArrayList<>());
         when(userCourseProgressRepository.save(testUserCourseProgress)).thenReturn(testUserCourseProgress);
         when(userCourseProgressMapper.toResponse(testUserCourseProgress)).thenReturn(userCourseProgressResponse);
 
